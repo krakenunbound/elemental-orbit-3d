@@ -81,8 +81,12 @@ function prettyConfiguration(configuration) {
     .replace(/(\d+)(?=\s)/g, (value) => value.split("").map((digit) => superscripts[digit]).join(""));
 }
 
+export function expandElectronConfiguration(configuration) {
+  return configuration.replace(/^\[([A-Za-z]+)\]\s*/, (_, core) => (nobleCores[core] || "") + " ").trim();
+}
+
 function shellPopulation(configuration) {
-  const expanded = configuration.replace(/^\[([A-Za-z]+)\]\s*/, (_, core) => (nobleCores[core] || "") + " ");
+  const expanded = expandElectronConfiguration(configuration);
   const shells = [0, 0, 0, 0, 0, 0, 0];
   for (const match of expanded.matchAll(/(\d)[spdf](\d+)/g)) shells[Number(match[1]) - 1] += Number(match[2]);
   return shells.filter((count, index) => count > 0 || shells.slice(index + 1).some(Boolean));
@@ -126,6 +130,8 @@ export const elements = rawElements.map((raw) => {
     color: meta.color,
     description,
     electronDisplay: prettyConfiguration(raw.electronicConfiguration),
+    orbitals: [...expandElectronConfiguration(raw.electronicConfiguration).matchAll(/(\d)([spdf])(\d+)/g)]
+      .map(([, shell, type, electrons]) => ({ shell: Number(shell), type, electrons: Number(electrons) })),
     shells: shellPopulation(raw.electronicConfiguration),
     block: orbitalBlock(layout, raw.symbol, raw.atomicNumber),
     period: layout.period,

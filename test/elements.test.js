@@ -16,6 +16,7 @@ test("all elements have renderable scientific and layout metadata", () => {
     assert.ok(element.atomicMass);
     assert.ok(element.electronicConfiguration);
     assert.ok(element.electronDisplay);
+    assert.ok(element.orbitals.length > 0);
     assert.ok(element.description.length > 25, element.symbol + " needs useful prose");
     assert.ok(CATEGORY_META[element.category], element.symbol + " has an invalid category");
     assert.ok(element.period >= 1 && element.period <= 7);
@@ -29,6 +30,14 @@ test("electron shell populations conserve atomic number", () => {
   for (const element of elements) {
     const electronCount = element.shells.reduce((sum, count) => sum + count, 0);
     assert.equal(electronCount, element.atomicNumber, element.symbol + " electron configuration");
+  }
+});
+
+test("expanded orbital occupancies conserve atomic number", () => {
+  for (const element of elements) {
+    const electronCount = element.orbitals.reduce((sum, orbital) => sum + orbital.electrons, 0);
+    assert.equal(electronCount, element.atomicNumber, element.symbol + " orbital configuration");
+    for (const orbital of element.orbitals) assert.match(orbital.type, /^[spdf]$/);
   }
 });
 

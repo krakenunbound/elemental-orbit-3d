@@ -236,15 +236,19 @@ try {
     Remove-TrackedServer
     Remove-StaleListener
 
-    $npmCommand = Get-Command npm.cmd -ErrorAction SilentlyContinue
-    if (-not $npmCommand) {
-        throw "npm.cmd was not found. Install Node.js and npm, then try again."
+    $nodeCommand = Get-Command node.exe -ErrorAction SilentlyContinue
+    if (-not $nodeCommand) {
+        throw "node.exe was not found. Install Node.js, then try again."
+    }
+    $viteScript = Join-Path $projectRoot "node_modules\vite\bin\vite.js"
+    if (-not (Test-Path -LiteralPath $viteScript)) {
+        throw "Vite is not installed. Run npm install in the project folder, then try again."
     }
 
     $jobHandle = [ElementalOrbit.ServerJob]::CreateKillOnCloseJob()
     $startInfo = [Diagnostics.ProcessStartInfo]::new()
-    $startInfo.FileName = $env:ComSpec
-    $startInfo.Arguments = '/d /s /c ""' + $npmCommand.Source + '" run dev -- --host 127.0.0.1 --port ' + $port + '"'
+    $startInfo.FileName = $nodeCommand.Source
+    $startInfo.Arguments = '"' + $viteScript + '" --host 127.0.0.1 --port ' + $port
     $startInfo.WorkingDirectory = $projectRoot
     $startInfo.UseShellExecute = $false
     $startInfo.CreateNoWindow = $false
@@ -272,7 +276,7 @@ try {
     else {
         $serverProcess.WaitForExit()
         if ($serverProcess.ExitCode -ne 0) {
-            throw "The npm server process exited with code $($serverProcess.ExitCode)."
+            throw "The Vite server process exited with code $($serverProcess.ExitCode)."
         }
     }
 }

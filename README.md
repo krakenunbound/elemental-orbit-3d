@@ -10,11 +10,15 @@ An interactive, scientifically audited periodic table that lets you explore all 
 
 ![Elemental Orbit spiral view](docs/screenshots/spiral-view.png)
 
+![Selected Scandium atom with color-coded protons, neutrons, and electrons](docs/screenshots/atomic-model-view.png)
+
 ## Highlights
 
 - Four coordinated views: **Spiral**, **Table**, **Shells**, and **Sphere**.
 - A cylindrical periodic helix with one complete turn per period and recurring families aligned on shared rails.
-- A relationship sphere with seven period bands, 18 distinct group arcs, offset f-series belts, and a visible atomic core.
+- A relationship sphere with seven period bands, 18 distinct group arcs, offset f-series belts, and a selectable central atom model.
+- Every selected element rebuilds the center as a neutral representative isotope with color-coded protons, neutrons, and electrons.
+- Two disclosed atomic views: an animated shell-population schematic and qualitative s/p/d/f orbital-family clouds.
 - Interactive mouse/touch rotation, zooming, element inspection, category filtering, hover explanations, and scientific trend formulas.
 - A procedural “Atomic Cosmos” environment with layered stars, luminous dust, orbital silhouettes, and a restrained nebula shader.
 - Automatic rotation resumes five seconds after intentional interaction ends; ordinary mouse movement does not reset the timer.
@@ -70,6 +74,8 @@ The launcher intentionally keeps its console window open: close that window or p
 - **Scroll / pinch:** zoom.
 - **Hover:** preview the element, category, and electron configuration.
 - **Click:** open the detailed element panel.
+- **Drag the selected atom:** rotate its central model independently.
+- **Shells / Cloud:** switch between the shell-population animation and qualitative orbital-family view.
 - **View selector:** morph between all four coordinate systems.
 - **Legend:** isolate an element category.
 - **Reset view:** restore the active layout’s camera.
@@ -104,6 +110,8 @@ npm run build
 - The visualization follows the traditional **La/Ac group-3 convention**; Lu and Lr remain in the f-series.
 - Group 12 is categorized as transition metal, a disclosed and defensible boundary convention.
 - Spatial arrangements are relationship visualizations. The Shells view is not a literal atomic orbital or Bohr-shell model.
+- Central natural-atom models use the most abundant isotope listed by NIST; elements without natural-abundance data use IUPAC’s bracketed representative nuclide.
+- Atomic models are deliberately schematic: nuclei are enlarged, distances are not to scale, fixed electron paths are not claimed, and cloud shapes are qualitative rather than calculated many-electron wavefunctions.
 
 The project’s review trail is preserved in [SCIENTIFIC_AUDIT.md](SCIENTIFIC_AUDIT.md), [SCIENTIFIC_REVIEW.md](SCIENTIFIC_REVIEW.md), and [SCIENTIFIC_REAUDIT.md](SCIENTIFIC_REAUDIT.md). See [CHANGELOG.md](CHANGELOG.md) for the implementation history.
 
@@ -113,6 +121,8 @@ The project’s review trail is preserved in [SCIENTIFIC_AUDIT.md](SCIENTIFIC_AU
 src/main.js           Three.js scene, interaction, layouts, shaders, and UI behavior
 src/elements.js       Normalized element metadata and scientific presentation
 src/atomic-masses.js  Pinned 118-element mass reference table
+src/isotopes.js       Representative isotope selection and provenance
+src/atomic-model.js   Color-coded nucleus, shell, and orbital-cloud renderer
 src/layouts.js        Testable helix and relationship-sphere coordinate math
 src/style.css         Responsive glass interface and accessibility styling
 test/                 Node-based scientific, geometry, and interface regression tests

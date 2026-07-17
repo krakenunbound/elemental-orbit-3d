@@ -4,6 +4,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { elements, CATEGORY_META } from "./elements.js";
+import { createAtomicModel } from "./atomic-model.js";
 import { meridianArcCoordinates, OCCLUSION_SPHERE_RADIUS, periodLatitude, periodicSpiralCoordinate, relationshipCoordinate } from "./layouts.js";
 import "./style.css";
 
@@ -296,33 +297,8 @@ const halo = new THREE.Points(haloGeometry, new THREE.PointsMaterial({
 }));
 atlas.add(halo);
 
-function createNucleus() {
-  const group = new THREE.Group();
-  const core = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(1.12, 2),
-    new THREE.MeshBasicMaterial({ color: 0x78ffe2, wireframe: true, transparent: true, opacity: 0.28 })
-  );
-  const glow = new THREE.Mesh(
-    new THREE.SphereGeometry(0.32, 24, 24),
-    new THREE.MeshBasicMaterial({ color: 0xb8fff1, transparent: true, opacity: 0.75 })
-  );
-  group.add(core, glow);
-  for (let index = 0; index < 3; index += 1) {
-    const curve = new THREE.EllipseCurve(0, 0, 1.75, 0.66, 0, Math.PI * 2);
-    const points = curve.getPoints(80).map((point) => new THREE.Vector3(point.x, point.y, 0));
-    const orbit = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(points),
-      new THREE.LineBasicMaterial({ color: index === 0 ? 0x6ef6d8 : 0x65728c, transparent: true, opacity: 0.22 })
-    );
-    orbit.rotation.set(index * Math.PI / 3, index * Math.PI / 4, index * Math.PI / 5);
-    group.add(orbit);
-  }
-  group.scale.setScalar(0.8);
-  return group;
-}
-
-const nucleus = createNucleus();
-atlas.add(nucleus);
+const atomicModel = createAtomicModel();
+scene.add(atomicModel.root);
 
 function seededRandom(seed = 0x5f3759df) {
   let state = seed >>> 0;
@@ -507,6 +483,9 @@ const tooltip = document.querySelector("#tooltip");
 const detailPanel = document.querySelector("#element-panel");
 const autoStatus = document.querySelector("#auto-status");
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let atomDragging = false;
+let atomPointerId = null;
+let atomPointerPosition = { x: 0, y: 0 };
 document.body.dataset.layout = activeLayout;
 
 function updateHalo() {
@@ -653,6 +632,33 @@ function positionTooltip(event) {
   tooltip.style.transform = "translate(" + left + "px, " + top + "px)";
 }
 
+function placeAtomicModel(layout = activeLayout) {
+  const hasSelection = Boolean(selectedSprite);
+  atomicModel.root.visible = layout !== "table" || hasSelection;
+  atomicModel.root.traverse((child) => {
+    if (!child.material) return;
+    const materials = Array.isArray(child.material) ? child.material : [child.material];
+    materials.forEach((material) => {
+      if (material.userData.atomicOriginalTransparent === undefined) {
+        material.userData.atomicOriginalTransparent = material.transparent;
+      }
+      const foreground = layout === "relations";
+      const nextTransparent = foreground || material.userData.atomicOriginalTransparent;
+      if (material.transparent !== nextTransparent) material.needsUpdate = true;
+      material.transparent = nextTransparent;
+      material.depthTest = !foreground;
+    });
+    child.renderOrder = layout === "relations" ? 50 : 0;
+  });
+  if (layout === "table") {
+    atomicModel.root.position.set(0, -8.6, 1.2);
+    atomicModel.root.scale.setScalar(hasSelection ? 0.52 : 0.42);
+    return;
+  }
+  atomicModel.root.position.set(0, 0, 0);
+  atomicModel.root.scale.setScalar(hasSelection ? (layout === "relations" ? 1.05 : 1.18) : (layout === "relations" ? 1.55 : 0.8));
+}
+
 function inspectElement(sprite) {
   selectedSprite = sprite;
   setHovered(null);
@@ -679,6 +685,14 @@ function inspectElement(sprite) {
     bar.title = count + " electrons";
     return bar;
   }));
+  const isotope = atomicModel.rebuild(element);
+  placeAtomicModel();
+  document.querySelector("#atom-isotope").textContent = isotope.notation;
+  document.querySelector("#atom-protons").textContent = isotope.protons;
+  document.querySelector("#atom-neutrons").textContent = isotope.neutrons;
+  document.querySelector("#atom-electrons").textContent = isotope.electrons;
+  document.querySelector("#atom-source-note").textContent = isotope.basis + "; source: " + isotope.source + ".";
+  updateSpriteOpacity();
   detailPanel.classList.add("visible");
   scheduleAutoRotationResume();
   playTone(260 + element.atomicNumber * 3, 0.09);
@@ -722,11 +736,8 @@ function setLayout(layout) {
   relationshipSphere.visible = layout === "relations";
   if (layout !== "relations") rebuildElementPath(layout);
   pathUniforms.uIntensity.value = layout === "table" ? 0.35 : 1;
-  nucleus.visible = layout !== "table";
-  nucleus.scale.setScalar(layout === "relations" ? 1.55 : 0.8);
-  nucleus.traverse((child) => {
-    if (child.material) child.material.depthTest = layout !== "relations";
-  });
+  placeAtomicModel(layout);
+  updateSpriteOpacity();
   controls.autoRotate = layout !== "table" && !selectedSprite && !reducedMotion;
   applyLayoutCamera(layout);
   scheduleAutoRotationResume();
@@ -744,12 +755,19 @@ function buildLegend() {
     button.addEventListener("click", () => {
       activeCategory = activeCategory === category ? null : category;
       legend.querySelectorAll("button").forEach((item) => item.classList.toggle("active", item.dataset.category === activeCategory));
-      sprites.forEach((sprite) => {
-        sprite.material.opacity = !activeCategory || sprite.userData.element.category === activeCategory ? 0.96 : 0.09;
-      });
+      updateSpriteOpacity();
       playTone(320, 0.07);
     });
     legend.append(button);
+  });
+}
+
+function updateSpriteOpacity() {
+  sprites.forEach((sprite) => {
+    const categoryMatches = !activeCategory || sprite.userData.element.category === activeCategory;
+    if (!categoryMatches) sprite.material.opacity = 0.07;
+    else if (selectedSprite && sprite !== selectedSprite) sprite.material.opacity = activeLayout === "relations" ? 0.82 : 0.62;
+    else sprite.material.opacity = 0.96;
   });
 }
 
@@ -758,12 +776,42 @@ updateHalo();
 applyLayoutCamera(activeLayout);
 
 canvas.addEventListener("pointermove", (event) => {
+  if (atomDragging && event.pointerId === atomPointerId) {
+    atomicModel.rotate(event.clientX - atomPointerPosition.x, event.clientY - atomPointerPosition.y);
+    atomPointerPosition = { x: event.clientX, y: event.clientY };
+    return;
+  }
   pointer.x = (event.clientX / innerWidth) * 2 - 1;
   pointer.y = -(event.clientY / innerHeight) * 2 + 1;
   pointerMoved = true;
   pointerInside = true;
   positionTooltip(event);
 });
+
+canvas.addEventListener("pointerdown", (event) => {
+  if (!selectedSprite || hoveredSprite || event.button !== 0) return;
+  const projected = atomicModel.root.position.clone().project(camera);
+  const centerX = (projected.x + 1) * innerWidth / 2;
+  const centerY = (1 - projected.y) * innerHeight / 2;
+  if (Math.hypot(event.clientX - centerX, event.clientY - centerY) > Math.min(180, innerWidth * 0.19)) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  atomDragging = true;
+  atomPointerId = event.pointerId;
+  atomPointerPosition = { x: event.clientX, y: event.clientY };
+  canvas.setPointerCapture(event.pointerId);
+  pauseAutoRotationForInteraction();
+  canvas.style.cursor = "grabbing";
+}, true);
+
+canvas.addEventListener("pointerup", (event) => {
+  if (!atomDragging || event.pointerId !== atomPointerId) return;
+  atomDragging = false;
+  atomPointerId = null;
+  canvas.releasePointerCapture(event.pointerId);
+  canvas.style.cursor = "grab";
+  scheduleAutoRotationResume();
+}, true);
 
 canvas.addEventListener("pointerleave", () => {
   pointer.set(-2, -2);
@@ -781,7 +829,27 @@ document.querySelectorAll(".view-button").forEach((button) => {
 document.querySelector("#close-detail").addEventListener("click", () => {
   detailPanel.classList.remove("visible");
   selectedSprite = null;
+  atomicModel.rebuild(null);
+  placeAtomicModel();
+  updateSpriteOpacity();
   scheduleAutoRotationResume();
+});
+document.querySelectorAll(".atom-mode").forEach((button) => {
+  button.addEventListener("click", () => {
+    const mode = button.dataset.atomMode;
+    atomicModel.setMode(mode);
+    placeAtomicModel();
+    document.querySelectorAll(".atom-mode").forEach((item) => {
+      const active = item.dataset.atomMode === mode;
+      item.classList.toggle("active", active);
+      item.setAttribute("aria-pressed", String(active));
+    });
+    document.querySelector("#atom-model-note").textContent = mode === "shell"
+      ? "Schematic shell animation; electrons are quantum probability distributions, not particles on fixed classical paths."
+      : "Qualitative orbital-family probability cloud (s/p/d/f); shapes and distances are illustrative, not calculated wavefunctions or to scale.";
+    document.querySelector("#orbital-key").hidden = mode !== "cloud";
+    scheduleAutoRotationResume();
+  });
 });
 document.querySelector("#focus-reset").addEventListener("click", () => {
   applyLayoutCamera(activeLayout);
@@ -836,15 +904,7 @@ function animate(time) {
   const seconds = time * 0.001;
   if (!reducedMotion) pathUniforms.uTime.value = seconds;
   pathUniforms.uFade.value += ((stillMoving ? 0 : 1) - pathUniforms.uFade.value) * 0.08;
-  nucleus.rotation.x = seconds * 0.08;
-  nucleus.rotation.y = seconds * 0.13;
-  if (activeLayout === "relations") {
-    const pulse = 1 + Math.sin(seconds * 2.2) * 0.13;
-    nucleus.children[1].scale.setScalar(pulse);
-  } else {
-    nucleus.children[1].scale.setScalar(1);
-  }
-  nucleus.children.slice(2).forEach((orbit, index) => { orbit.rotation.z += 0.0015 * (index + 1); });
+  atomicModel.animate(seconds, reducedMotion);
   halo.material.opacity = 0.38 + Math.sin(seconds * 1.4) * 0.12;
   if (!reducedMotion) {
     cosmicEnvironment.nebula.uniforms.uTime.value = seconds;

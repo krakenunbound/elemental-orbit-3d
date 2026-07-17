@@ -6,6 +6,21 @@ Project goals: **1. scientific accuracy · 2. style and beauty.** Original inspi
 
 ---
 
+## 1.1.0 — 2026-07-17 — Representative atomic models
+
+- Replaced the decorative central core with a selected-element atom model while retaining the original core as the unselected state.
+- Added color-coded proton, neutron, and electron counts for a neutral representative isotope of every element.
+- Added animated shell-population and qualitative orbital-family cloud modes with explicit scientific limitations.
+- Added independent mouse-drag rotation for the selected atom and selection-focused dimming of the surrounding atlas.
+- Added pinned NIST/IUPAC isotope provenance and regression tests covering all 118 representative nuclides and orbital electron totals.
+- Positioned the selected atom below the standard Table view so it never obscures element cards.
+- Kept the selected atom visible through the Sphere depth mask and foreground card crossings in both Shell and Cloud modes.
+- Raised non-selected card opacity to preserve legibility while maintaining clear selection emphasis.
+- Removed the nested `npm.cmd` process from the Windows launcher so Ctrl+C no longer produces duplicate batch-termination prompts.
+- Expanded the automated suite to 28 scientific, geometric, interaction, launcher, and production assertions.
+
+---
+
 ## Phase 10 — Standalone open-source release
 
 ### Added

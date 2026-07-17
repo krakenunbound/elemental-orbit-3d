@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#05080d" />
     <meta name="description" content="Explore all 118 chemical elements in an interactive three-dimensional periodic spiral." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>Elemental Orbit — 3D Periodic Table</title>
   </head>
   <body>
@@ -69,6 +70,28 @@
           <span>Electrons by shell</span>
           <div id="shell-bars" class="shell-bars"></div>
         </div>
+        <section class="atom-readout" aria-labelledby="atom-model-title">
+          <div class="atom-readout-heading">
+            <div>
+              <p class="eyebrow">CENTRAL ATOM MODEL</p>
+              <h3 id="atom-model-title">Representative <span id="atom-isotope">12-Carbon</span></h3>
+            </div>
+            <div class="atom-mode-switch" role="group" aria-label="Atomic model style">
+              <button type="button" class="atom-mode active" data-atom-mode="shell" aria-pressed="true">Shells</button>
+              <button type="button" class="atom-mode" data-atom-mode="cloud" aria-pressed="false">Cloud</button>
+            </div>
+          </div>
+          <div class="particle-counts" aria-label="Particle counts">
+            <span class="proton"><i></i><strong id="atom-protons">6</strong> protons</span>
+            <span class="neutron"><i></i><strong id="atom-neutrons">6</strong> neutrons</span>
+            <span class="electron"><i></i><strong id="atom-electrons">6</strong> electrons</span>
+          </div>
+          <div id="orbital-key" class="orbital-key" aria-label="Orbital family colors" hidden>
+            <span class="orbital-s">s</span><span class="orbital-p">p</span><span class="orbital-d">d</span><span class="orbital-f">f</span>
+          </div>
+          <p id="atom-model-note" class="atom-model-note">Schematic shell animation; electrons are quantum probability distributions, not particles on fixed classical paths.</p>
+          <p id="atom-source-note" class="atom-source-note"></p>
+        </section>
       </section>
 
       <aside class="trend-panel glass-panel">
@@ -102,7 +125,7 @@
         </div>
         <div class="relationship-rule core-rule">
           <span class="rule-icon"><i></i></span>
-          <div><strong>Central atomic core</strong><small>A visual origin for the orbital lattice</small></div>
+          <div><strong>Central atom model</strong><small>Select an element to reveal a representative isotope</small></div>
         </div>
         <p class="relationship-note">Compare a latitude band across one period, or follow a highlighted arc through a main-table family. The two f-series use separate offset belts.</p>
       </aside>
@@ -129,7 +152,7 @@
         <p class="eyebrow">ABOUT THE VIEWS</p>
         <h2>A map of repeating behavior</h2>
         <p>Spiral winds each period through one turn of a descending helix, so groups align on straight vertical rails — an echo of de Chancourtois' 1862 telluric screw, the first periodic system. Table restores the familiar group structure. Shells arranges periods as concentric rings—a structural metaphor, not a literal Bohr model. Sphere maps periods onto latitude bands, with separate f-series belts and distinct main-group arcs. The glowing wire traces atomic number, and its pulse travels from hydrogen to oganesson.</p>
-        <p class="dialog-note">Visual scale is interpretive. This visualization uses the traditional La/Ac group-3 convention; Lu and Lr remain in the f-series. Atomic weights follow CIAAW 2024 abridged values. Bracketed values follow IUPAC’s current periodic-table convention for elements without a standard atomic weight.</p>
+        <p class="dialog-note">Visual scale is interpretive. Atomic models are schematic: nuclei are enlarged, distances are not to scale, and electron clouds are qualitative orbital-family shapes. Representative natural isotopes use NIST isotopic-composition data; elements without natural abundance use IUPAC’s bracketed nuclide. This visualization uses the traditional La/Ac group-3 convention; Lu and Lr remain in the f-series. Atomic weights follow CIAAW 2024 abridged values. Bracketed values follow IUPAC’s periodic-table convention.</p>
       </dialog>
     </div>
     <script type="module" src="/src/main.js"></script>
