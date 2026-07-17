@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#05080d" />
+    <meta name="description" content="Explore all 118 chemical elements in an interactive three-dimensional periodic spiral." />
+    <title>Elemental Orbit — 3D Periodic Table</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene" aria-label="Interactive three-dimensional periodic table"></canvas>
+
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Elemental Orbit home">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span><strong>ELEMENTAL</strong><em>ORBIT</em></span>
+        </a>
+        <nav class="view-switcher" aria-label="Visualization layout">
+          <span>VIEW</span>
+          <button class="view-button active" data-layout="spiral">Spiral</button>
+          <button class="view-button" data-layout="table">Table</button>
+          <button class="view-button" data-layout="shells">Shells</button>
+          <button class="view-button" data-layout="relations">Sphere</button>
+        </nav>
+        <div class="header-actions">
+          <button id="sound-toggle" class="icon-button" aria-label="Toggle interface sound" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9v6h4l5 4V5L9 9H5Zm12.5 3a4.5 4.5 0 0 0-2-3.87v7.74A4.5 4.5 0 0 0 17.5 12Z"/></svg>
+          </button>
+          <button id="info-toggle" class="icon-button" aria-label="About this visualization">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7.2v.1"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <aside class="intro-panel glass-panel">
+        <p id="intro-eyebrow" class="eyebrow">AN ATOMIC ATLAS</p>
+        <h1><span id="intro-title-main">The periodic table,</span><br><span id="intro-title-accent">set in motion.</span></h1>
+        <p id="intro-copy" class="intro-copy">From hydrogen to oganesson, trace the repeating architecture of matter through space.</p>
+        <div class="stats-row">
+          <div><strong>118</strong><span>elements</span></div>
+          <div><strong>7</strong><span>periods</span></div>
+          <div><strong>4</strong><span>orbital blocks</span></div>
+        </div>
+      </aside>
+
+      <section id="element-panel" class="element-panel glass-panel" aria-live="polite">
+        <div class="element-heading">
+          <div id="detail-tile" class="detail-tile">
+            <span id="detail-number">6</span>
+            <strong id="detail-symbol">C</strong>
+            <small id="detail-mass">12.011</small>
+          </div>
+          <div>
+            <p id="detail-category" class="eyebrow">REACTIVE NONMETAL</p>
+            <h2 id="detail-name">Carbon</h2>
+            <p id="detail-config" class="config">[He] 2s² 2p²</p>
+          </div>
+          <button id="close-detail" class="close-button" aria-label="Close element details">×</button>
+        </div>
+        <p id="detail-description" class="element-description"></p>
+        <dl class="property-grid">
+          <div><dt>Period</dt><dd id="detail-period">2</dd></div>
+          <div><dt>Group</dt><dd id="detail-group">14</dd></div>
+          <div><dt>Phase</dt><dd id="detail-phase">Solid</dd></div>
+          <div><dt>Block</dt><dd id="detail-block">p-block</dd></div>
+        </dl>
+        <div class="shell-readout">
+          <span>Electrons by shell</span>
+          <div id="shell-bars" class="shell-bars"></div>
+        </div>
+      </section>
+
+      <aside class="trend-panel glass-panel">
+        <p class="eyebrow">PERIODIC SIGNALS</p>
+        <div class="formula active">
+          <span>Atomic radius</span>
+          <strong>r ∝ n² / Z<sub>eff</sub></strong>
+          <small>generally grows ↓ and ←</small>
+        </div>
+        <div class="formula">
+          <span>1st ionization energy</span>
+          <strong>X → X⁺ + e⁻</strong>
+          <small>generally grows ↑ and →</small>
+        </div>
+        <div class="formula">
+          <span>Electronegativity</span>
+          <strong>χ<sub>P</sub></strong>
+          <small>generally grows ↑ and →</small>
+        </div>
+      </aside>
+
+      <aside class="relationship-panel glass-panel">
+        <p class="eyebrow">HOW TO READ THE SPHERE</p>
+        <div class="relationship-rule period-rule">
+          <span class="rule-icon"><i></i><i></i><i></i></span>
+          <div><strong>7 period bands</strong><small>Periods occupy latitude bands</small></div>
+        </div>
+        <div class="relationship-rule group-rule">
+          <span class="rule-icon"><i></i><i></i><i></i></span>
+          <div><strong>18 group arcs</strong><small>Main-table groups trace distinct pole-to-pole paths</small></div>
+        </div>
+        <div class="relationship-rule core-rule">
+          <span class="rule-icon"><i></i></span>
+          <div><strong>Central atomic core</strong><small>A visual origin for the orbital lattice</small></div>
+        </div>
+        <p class="relationship-note">Compare a latitude band across one period, or follow a highlighted arc through a main-table family. The two f-series use separate offset belts.</p>
+      </aside>
+
+      <div class="legend" aria-label="Element category legend"></div>
+
+      <div class="controls-hint glass-panel">
+        <span class="mouse-icon" aria-hidden="true"></span>
+        <p><strong>DRAG</strong> rotate <i></i><strong>SCROLL</strong> zoom <i></i><strong>CLICK</strong> inspect</p>
+        <span id="auto-status" class="auto-status" aria-live="polite">AUTO · ON</span>
+      </div>
+
+      <button id="focus-reset" class="reset-button glass-panel" aria-label="Reset camera">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/></svg>
+        Reset view
+      </button>
+
+      <div id="tooltip" class="tooltip" role="tooltip"></div>
+      <div class="vignette"></div>
+      <div id="loading" class="loading-screen"><div class="loading-orbit"><i></i><i></i><i></i></div><p>Assembling matter</p></div>
+
+      <dialog id="about-dialog">
+        <button id="close-about" class="close-button" aria-label="Close">×</button>
+        <p class="eyebrow">ABOUT THE VIEWS</p>
+        <h2>A map of repeating behavior</h2>
+        <p>Spiral winds each period through one turn of a descending helix, so groups align on straight vertical rails — an echo of de Chancourtois' 1862 telluric screw, the first periodic system. Table restores the familiar group structure. Shells arranges periods as concentric rings—a structural metaphor, not a literal Bohr model. Sphere maps periods onto latitude bands, with separate f-series belts and distinct main-group arcs. The glowing wire traces atomic number, and its pulse travels from hydrogen to oganesson.</p>
+        <p class="dialog-note">Visual scale is interpretive. This visualization uses the traditional La/Ac group-3 convention; Lu and Lr remain in the f-series. Atomic weights follow CIAAW 2024 abridged values. Bracketed values follow IUPAC’s current periodic-table convention for elements without a standard atomic weight.</p>
+      </dialog>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

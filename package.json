@@ -1,0 +1,36 @@
+{
+  "name": "elemental-orbit-3d",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A scientifically audited, interactive 3D periodic table built with Three.js.",
+  "license": "MIT",
+  "author": "Kraken Unbound",
+  "homepage": "https://krakenunbound.github.io/elemental-orbit-3d/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/krakenunbound/elemental-orbit-3d.git"
+  },
+  "keywords": [
+    "periodic-table",
+    "threejs",
+    "chemistry",
+    "visualization",
+    "webgl",
+    "education"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test",
+    "check": "npm test && npm run build"
+  },
+  "dependencies": {
+    "periodic-table": "^0.0.8",
+    "three": "^0.179.1"
+  },
+  "devDependencies": {
+    "vite": "^7.0.5"
+  }
+}

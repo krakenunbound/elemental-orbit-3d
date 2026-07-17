@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.server-state.json
+vite.log
+vite-error.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+coverage/

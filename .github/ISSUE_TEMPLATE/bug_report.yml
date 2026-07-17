@@ -1,0 +1,30 @@
+name: Bug report
+description: Report reproducible visual, interaction, or scientific behavior.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Describe the observed and expected behavior.
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: View
+      options: [Spiral, Table, Shells, Sphere, Interface or all views]
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction steps
+      placeholder: "1. Open…\n2. Select…\n3. Observe…"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Browser and device
+  - type: textarea
+    attributes:
+      label: Scientific source
+      description: For scientific corrections, provide an authoritative source when possible.
